@@ -20,10 +20,12 @@ public:
 	FString ItemDescription;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jigsaw Piece")
-	UTexture2D* PieceIcon;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jigsaw Piece")
 	UStaticMesh* PieceMesh;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jigsaw Piece")
+	UMaterialInterface* PieceMaterial;
+
+
 
 	bool operator==(const FJigsawPiece& other) const
 	{
@@ -57,6 +59,11 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Jigsaw Piece")
 	void UpdateMesh();
 
+public:
+	UFUNCTION(BlueprintCallable, Category = "Jigsaw Piece")
+	FVector2D GetDimensions() const { return m_Dimensions; }
+
+	UTexture2D* GetPieceIcon();
 
 private:
 
@@ -69,5 +76,7 @@ private:
 
 	class UJI_JigsawInventoryComponent* m_JigsawInventory;
 
+	UPROPERTY(EditAnywhere, Category = "Jigsaw Piece", meta = (AllowPrivateAccess = true, DisplayName = "Dimensions"))
+	FVector2D m_Dimensions;
 
 };
