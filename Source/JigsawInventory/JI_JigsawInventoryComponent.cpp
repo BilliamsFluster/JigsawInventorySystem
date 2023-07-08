@@ -39,31 +39,59 @@ bool UJI_JigsawInventoryComponent::TryAddItem(AJI_JigsawPiece* piece)
 
 bool UJI_JigsawInventoryComponent::IsRoomAvailable(AJI_JigsawPiece* piece, int topLeftIndex)
 {
-	FVector2D tile = IterateTiles(piece, topLeftIndex);
+	/*FVector2D tile = IterateTiles(piece, topLeftIndex);
 	if (IsTileValid(tile))
 	{
-		ValidPiece p = GetItemAtIndex(TileToIndex(tile));
+		FValidPiece p = GetItemAtIndex(TileToIndex(tile));
 		if (p.Valid)
 		{
 			if (UKismetSystemLibrary::IsValid(piece))
 			{
+				return true;
+			}
+		}
+		
+	}
+	return false;*/
+	FVector2D dimensions = piece->GetDimensions();
+	FVector2D top_left_tile = IndexToTile(topLeftIndex);
+
+	// iterate over each tile that the piece would cover
+	for (int i = 0; i < dimensions.X; ++i) {
+		for (int j = 0; j < dimensions.Y; ++j) {
+			FVector2D current_tile = FVector2D(top_left_tile.X + i, top_left_tile.Y + j);
+			// check if the tile is valid and if there is a piece on that tile
+			if (!IsTileValid(current_tile) || GetItemAtIndex(TileToIndex(current_tile)).Piece != nullptr) {
+				// if the tile is not valid or there's a piece already, the room is not available
 				return false;
 			}
 		}
-		else
-		{
-			return false;
-		}
 	}
+
+	// if all tiles are valid and have no pieces, the room is available
 	return true;
 	
 	 
 }  
 void UJI_JigsawInventoryComponent::AddItemAt(AJI_JigsawPiece* piece, int topLeftIndex)
 {
-	FVector2D tile = IterateTiles(piece, topLeftIndex);
+	/*FVector2D tile = IterateTiles(piece, topLeftIndex);
 	
 	m_JigsawInventory[TileToIndex(tile)] = piece;
+
+	m_InventoryChanged = true;*/
+
+	FVector2D dimensions = piece->GetDimensions();
+	FVector2D top_left_tile = IndexToTile(topLeftIndex);
+
+	// iterate over each tile that the piece would cover
+	for (int i = 0; i < dimensions.X; ++i) {
+		for (int j = 0; j < dimensions.Y; ++j) {
+			FVector2D current_tile = FVector2D(top_left_tile.X + i, top_left_tile.Y + j);
+			// add the piece to each tile
+			m_JigsawInventory[TileToIndex(current_tile)] = piece;
+		}
+	}
 
 	m_InventoryChanged = true;
 
@@ -94,15 +122,13 @@ FVector2D UJI_JigsawInventoryComponent::IterateTiles(AJI_JigsawPiece* piece, int
 		}
 	}
 	return FVector2D(1, 1); // if something happened this is a message
+
+	
 }
 
 bool UJI_JigsawInventoryComponent::IsTileValid(FVector2D tile)
 {
-	if (tile.X >= 0 && tile.Y >= 0 && tile.X < 0 && tile.Y < 0)
-	{
-		return true;
-	}
-	return false;
+	return (tile.X >= 0 && tile.Y >= 0 && tile.X < m_Columns && tile.Y < m_Rows);
 }
 
 UDataTable* UJI_JigsawInventoryComponent::GetInventoryDataTable() const
@@ -121,30 +147,18 @@ void UJI_JigsawInventoryComponent::SetJigsawInventorySize(int col, int row)
 	m_JigsawInventory.SetNum(ArraySize);
 }
 
-ValidPiece UJI_JigsawInventoryComponent::GetItemAtIndex(int index)
+FValidPiece UJI_JigsawInventoryComponent::GetItemAtIndex(int index)
 {
 	if (m_JigsawInventory.IsValidIndex(index))
 	{
-		return ValidPiece{ true, m_JigsawInventory[index] };
+		return FValidPiece{ true, m_JigsawInventory[index] };
 	}
-	return ValidPiece{ false, {} };
+	return FValidPiece{ false, {} };
 }
 
 
 
-void UJI_JigsawInventoryComponent::AddItem(AJI_JigsawPiece* piece)
-{
-	if (m_JigsawInventory.Contains(piece))
-	{
-		return;
-	}
 
-	// Check if the item exists in the data table
-	
-
-	// If everything is ok, add the item to the inventory
-	m_JigsawInventory.Add(piece);
-}
 
 void UJI_JigsawInventoryComponent::RemoveItem(AJI_JigsawPiece* piece)
 {
@@ -155,6 +169,38 @@ void UJI_JigsawInventoryComponent::RemoveItem(AJI_JigsawPiece* piece)
 		m_JigsawInventory.Remove(piece);
 	}
 	
+}
+
+FItemCoord UJI_JigsawInventoryComponent::IterateOverJigsawInventoryCoordItems()
+{
+	TArray<AJI_JigsawPiece*> inventoryKeys;
+	m_JigsawInventoryCoordItems.GetKeys(inventoryKeys);
+
+	for (auto key : inventoryKeys)
+	{
+		FVector2D* coord = m_JigsawInventoryCoordItems.Find(key); // returns the value
+		if (coord != nullptr)
+		{
+			return FItemCoord{ key, *coord };
+		}
+	}
+	return FItemCoord{}; // couldnt find it 
+}
+
+TMap<AJI_JigsawPiece*, FVector2D>& UJI_JigsawInventoryComponent::GetAllJigsawPieces()
+{
+	for (int i = 0; i < m_JigsawInventory.Num() - 1; i++)
+	{
+		if (UKismetSystemLibrary::IsValid(m_JigsawInventory[i]))
+		{
+			if (!m_JigsawInventoryCoordItems.Contains(m_JigsawInventory[i]))
+			{
+				m_JigsawInventoryCoordItems.Add(m_JigsawInventory[i], IndexToTile(i));
+				break;
+			}
+		}
+	}
+	return m_JigsawInventoryCoordItems;
 }
 
 // Called when the game starts

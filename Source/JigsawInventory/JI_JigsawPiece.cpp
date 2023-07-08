@@ -54,6 +54,12 @@ void AJI_JigsawPiece::UpdateMesh()
 }
 
 
+FVector2D& AJI_JigsawPiece::GetDimensions()
+{
+    UE_LOG(LogTemp, Warning, TEXT("Material Instance: %f"), m_PieceData.GetRow<FJigsawPiece>("PieceDimensions")->Dimensions.X);
+    return m_PieceData.GetRow<FJigsawPiece>("PieceDimensions")->Dimensions;
+}
+
 UTexture2D* AJI_JigsawPiece::GetPieceIcon()
 {
     if (!m_PieceData.DataTable) {

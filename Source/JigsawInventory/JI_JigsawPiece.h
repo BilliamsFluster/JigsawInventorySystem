@@ -21,6 +21,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jigsaw Piece")
 	UStaticMesh* PieceMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jigsaw Piece")
+	FVector2D Dimensions;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jigsaw Piece")
 	UMaterialInterface* PieceMaterial;
@@ -60,9 +63,10 @@ protected:
 	void UpdateMesh();
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Jigsaw Piece")
-	FVector2D GetDimensions() const { return m_Dimensions; }
+	UFUNCTION(BlueprintPure, Category = "Jigsaw Piece")
+	FVector2D& GetDimensions();
 
+	UFUNCTION(BlueprintCallable, Category = "Jigsaw Piece")
 	UTexture2D* GetPieceIcon();
 
 private:
@@ -76,7 +80,6 @@ private:
 
 	class UJI_JigsawInventoryComponent* m_JigsawInventory;
 
-	UPROPERTY(EditAnywhere, Category = "Jigsaw Piece", meta = (AllowPrivateAccess = true, DisplayName = "Dimensions"))
-	FVector2D m_Dimensions;
+	
 
 };
