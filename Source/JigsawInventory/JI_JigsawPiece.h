@@ -66,8 +66,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Jigsaw Piece")
 	FVector2D& GetDimensions();
 
+
+	void OnRemoved();
 	UFUNCTION(BlueprintCallable, Category = "Jigsaw Piece")
 	UTexture2D* GetPieceIcon();
+
+	UFUNCTION(BlueprintPure, Category = "Jigsaw Piece")
+	class UJI_JigsawInventoryComponent* GetOwningInventory() { return m_JigsawInventory; }
+
+	UFUNCTION(BlueprintCallable, Category = "Jigsaw Piece")
+	void SetOwningInventory(UJI_JigsawInventoryComponent* inventory) { m_JigsawInventory = inventory; }
 
 private:
 
@@ -78,7 +86,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Jigsaw Piece", meta = (AllowPrivateAccess = true, DisplayName = "Mesh"))
 	UStaticMeshComponent* m_MeshComponent;
 
-	class UJI_JigsawInventoryComponent* m_JigsawInventory;
+	UJI_JigsawInventoryComponent* m_JigsawInventory;
 
 	
 

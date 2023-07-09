@@ -44,6 +44,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool IsRoomAvailable(AJI_JigsawPiece* piece, int topLeftIndex);
 	
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void AddItemAt(AJI_JigsawPiece* piece, int topLeftIndex);
 	
 	UFUNCTION(BlueprintPure, Category = "Inventory")

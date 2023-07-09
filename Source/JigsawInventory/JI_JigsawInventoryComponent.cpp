@@ -28,10 +28,7 @@ bool UJI_JigsawInventoryComponent::TryAddItem(AJI_JigsawPiece* piece)
 				piece->GetPieceIcon();
 				return true;
 			}
-			if (i >= m_JigsawInventory.Num())
-			{
-				return false;
-			}
+			
 		}
 	}
 	return false;
@@ -39,20 +36,7 @@ bool UJI_JigsawInventoryComponent::TryAddItem(AJI_JigsawPiece* piece)
 
 bool UJI_JigsawInventoryComponent::IsRoomAvailable(AJI_JigsawPiece* piece, int topLeftIndex)
 {
-	/*FVector2D tile = IterateTiles(piece, topLeftIndex);
-	if (IsTileValid(tile))
-	{
-		FValidPiece p = GetItemAtIndex(TileToIndex(tile));
-		if (p.Valid)
-		{
-			if (UKismetSystemLibrary::IsValid(piece))
-			{
-				return true;
-			}
-		}
-		
-	}
-	return false;*/
+	
 	FVector2D dimensions = piece->GetDimensions();
 	FVector2D top_left_tile = IndexToTile(topLeftIndex);
 
@@ -89,11 +73,36 @@ void UJI_JigsawInventoryComponent::AddItemAt(AJI_JigsawPiece* piece, int topLeft
 		for (int j = 0; j < dimensions.Y; ++j) {
 			FVector2D current_tile = FVector2D(top_left_tile.X + i, top_left_tile.Y + j);
 			// add the piece to each tile
-			m_JigsawInventory[TileToIndex(current_tile)] = piece;
+			int index = TileToIndex(current_tile);
+			if (index >= 0 && index < m_JigsawInventory.Num())
+			{
+				// Only try to access the array if the index is within bounds
+				m_JigsawInventory[index] = piece;
+			}
+			else
+			{
+				// Handle the error case when the index is out of bounds
+				// For example, you can log a warning message
+				UE_LOG(LogTemp, Warning, TEXT("Index out of bounds: %d"), index);
+			}
 		}
 	}
 
 	m_InventoryChanged = true;
+
+	// Debug log to check if piece was added successfully
+	int debugIndex = TileToIndex(top_left_tile);
+	if (debugIndex >= 0 && debugIndex < m_JigsawInventory.Num())
+	{
+		if (m_JigsawInventory[debugIndex] == piece)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Piece added successfully at index: %d"), debugIndex);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to add piece at index: %d"), debugIndex);
+		}
+	}
 
 }
 int UJI_JigsawInventoryComponent::TileToIndex(FVector2D tile)
@@ -162,12 +171,20 @@ FValidPiece UJI_JigsawInventoryComponent::GetItemAtIndex(int index)
 
 void UJI_JigsawInventoryComponent::RemoveItem(AJI_JigsawPiece* piece)
 {
-	// Check if the item is in the inventory
-	if (m_JigsawInventory.Find(piece))
+	for (int i = 0; i < m_JigsawInventory.Num(); i++)
+	{
+		if (m_JigsawInventory[i] == piece)
+		{
+			m_JigsawInventory[i] = nullptr;
+		}
+	}
+	// Check if the item is in the inventoryCoordItems
+	if (m_JigsawInventoryCoordItems.Contains(piece))
 	{
 		// If it is, remove it
-		m_JigsawInventory.Remove(piece);
+		m_JigsawInventoryCoordItems.Remove(piece);
 	}
+	m_InventoryChanged = true;
 	
 }
 

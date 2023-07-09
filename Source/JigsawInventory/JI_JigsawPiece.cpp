@@ -56,8 +56,11 @@ void AJI_JigsawPiece::UpdateMesh()
 
 FVector2D& AJI_JigsawPiece::GetDimensions()
 {
-    UE_LOG(LogTemp, Warning, TEXT("Material Instance: %f"), m_PieceData.GetRow<FJigsawPiece>("PieceDimensions")->Dimensions.X);
     return m_PieceData.GetRow<FJigsawPiece>("PieceDimensions")->Dimensions;
+}
+
+void AJI_JigsawPiece::OnRemoved()
+{
 }
 
 UTexture2D* AJI_JigsawPiece::GetPieceIcon()
@@ -85,7 +88,6 @@ UTexture2D* AJI_JigsawPiece::GetPieceIcon()
                 // Try to cast to UTexture2D
                 if (UTexture2D* Texture2D = Cast<UTexture2D>(BaseTexture))
                 {
-                    UE_LOG(LogTemp, Warning, TEXT("Texture found: %s"), *Texture2D->GetPathName());
                     return Texture2D;
                 }
             }
